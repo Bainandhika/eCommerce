@@ -1,8 +1,6 @@
 import app from './app.js';
 
-const PORT = Number.parseInt(process.env.PORT || '3000', 10);
-
-app.listen({ port: PORT }, (err, address) => {
+app.listen({ port: 3000 }, (err, address) => {
   if (err) {
     app.log.error(err);
     process.exit(1);
