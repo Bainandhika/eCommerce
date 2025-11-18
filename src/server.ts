@@ -1,14 +1,13 @@
-import dotenv from "dotenv";
+import { config } from "./core/config.js";
 import { buildApp } from "./app.js";
 
-dotenv.config();
-
 const app = buildApp();
-const port = Number(process.env.PORT) || 3000;
+const host = config.host;
+const port = config.port;
 
 try {
-  await app.listen({ port, host: "0.0.0.0" });
-  app.log.info(`Server listening at http://localhost:${port}`);
+  await app.listen({ port, host });
+  app.log.info(`Server listening at http://${host}:${port}`);
 } catch (err) {
   app.log.error(err);
   process.exit(1);
