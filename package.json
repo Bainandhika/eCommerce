@@ -9,7 +9,15 @@
     "build": "tsc",
     "start": "tsx src/server.ts",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest --passWithNoTests",
-    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch"
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:reset": "prisma migrate reset",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:push": "prisma db push",
+    "db:pull": "prisma db pull"
   },
   "keywords": [],
   "author": "",

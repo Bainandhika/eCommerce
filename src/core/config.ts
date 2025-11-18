@@ -3,15 +3,15 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const config = {
-  host: process.env.HOST,
+  host: process.env.HOST || "localhost",
   port: Number(process.env.PORT) || 3000,
-  db: {
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT) || 3306,
-    user: process.env.DB_USER,
-    pass: process.env.DB_PASS,
+  database: {
+    url:
+      process.env.DATABASE_URL ||
+      "mysql://root:secret@localhost:3306/ecommerce",
   },
   jwt: {
-    secret: process.env.JWT_SECRET,
+    secret: process.env.JWT_SECRET || "supersecretkey",
   },
+  nodeEnv: process.env.NODE_ENV || "development",
 };
