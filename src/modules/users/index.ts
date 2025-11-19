@@ -10,7 +10,7 @@ import {
 } from "../../schemas/index.js";
 
 const usersModule: FastifyPluginAsync = async (fastify, options) => {
-  const dbService = new DatabaseService(fastify.prisma);
+  const dbService = new DatabaseService(fastify.mysql);
 
   // GET /api/users - Get all users
   fastify.get(
@@ -152,8 +152,8 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
       } catch (error: any) {
         fastify.log.error(error);
 
-        // Handle unique constraint violation
-        if (error.code === "P2002") {
+        // Handle unique constraint violation (MySQL error code ER_DUP_ENTRY)
+        if (error.code === "ER_DUP_ENTRY") {
           return reply.status(409).send({
             success: false,
             error: "Email already exists",
@@ -266,7 +266,8 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
       } catch (error: any) {
         fastify.log.error(error);
 
-        if (error.code === "P2025") {
+        // Handle not found error
+        if (error.message === "User not found") {
           return reply.status(404).send({
             success: false,
             error: "User not found",

@@ -2,7 +2,7 @@ import { FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import { fastifyAwilixPlugin } from "@fastify/awilix";
 import { asClass, asValue, Lifetime } from "awilix";
-import { PrismaClient } from "@prisma/client";
+import type { Pool } from "mysql2/promise";
 import { DatabaseService } from "../core/database.service.js";
 
 /**
@@ -12,7 +12,7 @@ import { DatabaseService } from "../core/database.service.js";
 declare module "@fastify/awilix" {
   interface Cradle {
     // Core dependencies
-    prisma: PrismaClient;
+    mysql: Pool;
 
     // Services
     databaseService: DatabaseService;
@@ -46,9 +46,9 @@ const diPlugin: FastifyPluginAsync = async (fastify, options) => {
 
   // Register core dependencies
   fastify.diContainer.register({
-    // Prisma Client - Singleton (one instance for entire app)
-    // We use the existing prisma instance from the database plugin
-    prisma: asValue(fastify.prisma),
+    // MySQL Pool - Singleton (one instance for entire app)
+    // We use the existing mysql pool from the database plugin
+    mysql: asValue(fastify.mysql),
   });
 
   // Register services

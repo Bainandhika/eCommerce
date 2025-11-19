@@ -11,7 +11,7 @@ import {
 } from "../../schemas/index.js";
 
 const productsModule: FastifyPluginAsync = async (fastify, options) => {
-  const dbService = new DatabaseService(fastify.prisma);
+  const dbService = new DatabaseService(fastify.mysql);
 
   // GET /api/products - Get all products
   fastify.get<{
@@ -230,7 +230,8 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
       } catch (error: any) {
         fastify.log.error(error);
 
-        if (error.code === "P2025") {
+        // Handle not found error
+        if (error.message === "Product not found") {
           return reply.status(404).send({
             success: false,
             error: "Product not found",
@@ -279,7 +280,8 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
       } catch (error: any) {
         fastify.log.error(error);
 
-        if (error.code === "P2025") {
+        // Handle not found error
+        if (error.message === "Product not found") {
           return reply.status(404).send({
             success: false,
             error: "Product not found",
