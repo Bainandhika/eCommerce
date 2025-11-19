@@ -1,29 +1,86 @@
 import { FastifyPluginAsync } from "fastify";
 import { DatabaseService } from "../../core/database.service.js";
+import {
+  UserSchema,
+  CreateUserSchema,
+  UpdateUserSchema,
+  ErrorResponseSchema,
+  DeleteResponseSchema,
+  IdParamSchema,
+} from "../../schemas/index.js";
 
 const usersModule: FastifyPluginAsync = async (fastify, options) => {
   const dbService = new DatabaseService(fastify.prisma);
 
   // GET /api/users - Get all users
-  fastify.get("/users", async (request, reply) => {
-    try {
-      const users = await dbService.getAllUsers();
-      return reply.send({
-        success: true,
-        data: users,
-      });
-    } catch (error) {
-      fastify.log.error(error);
-      return reply.status(500).send({
-        success: false,
-        error: "Failed to fetch users",
-      });
+  fastify.get(
+    "/users",
+    {
+      schema: {
+        description: "Get all users",
+        tags: ["users"],
+        response: {
+          200: {
+            description: "Successful response",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: true },
+              data: {
+                type: "array",
+                items: UserSchema,
+              },
+            },
+          },
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const users = await dbService.getAllUsers();
+        return reply.send({
+          success: true,
+          data: users,
+        });
+      } catch (error) {
+        fastify.log.error(error);
+        return reply.status(500).send({
+          success: false,
+          error: "Failed to fetch users",
+        });
+      }
     }
-  });
+  );
 
   // GET /api/users/:id - Get user by ID
   fastify.get<{ Params: { id: string } }>(
     "/users/:id",
+    {
+      schema: {
+        description: "Get a single user by ID",
+        tags: ["users"],
+        params: IdParamSchema,
+        response: {
+          200: {
+            description: "Successful response",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: true },
+              data: UserSchema,
+            },
+          },
+          404: {
+            description: "User not found",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              error: { type: "string", example: "User not found" },
+            },
+          },
+          500: ErrorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       try {
         const id = parseInt(request.params.id);
@@ -61,14 +118,27 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
     "/users",
     {
       schema: {
-        body: {
-          type: "object",
-          required: ["email", "password"],
-          properties: {
-            email: { type: "string", format: "email" },
-            name: { type: "string" },
-            password: { type: "string", minLength: 6 },
+        description: "Create a new user",
+        tags: ["users"],
+        body: CreateUserSchema,
+        response: {
+          201: {
+            description: "User created successfully",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: true },
+              data: UserSchema,
+            },
           },
+          409: {
+            description: "Email already exists",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              error: { type: "string", example: "Email already exists" },
+            },
+          },
+          500: ErrorResponseSchema,
         },
       },
     },
@@ -106,35 +176,84 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
       name?: string;
       password?: string;
     };
-  }>("/users/:id", async (request, reply) => {
-    try {
-      const id = parseInt(request.params.id);
-      const user = await dbService.updateUser(id, request.body);
+  }>(
+    "/users/:id",
+    {
+      schema: {
+        description: "Update an existing user",
+        tags: ["users"],
+        params: IdParamSchema,
+        body: UpdateUserSchema,
+        response: {
+          200: {
+            description: "User updated successfully",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: true },
+              data: UserSchema,
+            },
+          },
+          404: {
+            description: "User not found",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              error: { type: "string", example: "User not found" },
+            },
+          },
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const id = parseInt(request.params.id);
+        const user = await dbService.updateUser(id, request.body);
 
-      return reply.send({
-        success: true,
-        data: user,
-      });
-    } catch (error: any) {
-      fastify.log.error(error);
+        return reply.send({
+          success: true,
+          data: user,
+        });
+      } catch (error: any) {
+        fastify.log.error(error);
 
-      if (error.code === "P2025") {
-        return reply.status(404).send({
+        if (error.code === "P2025") {
+          return reply.status(404).send({
+            success: false,
+            error: "User not found",
+          });
+        }
+
+        return reply.status(500).send({
           success: false,
-          error: "User not found",
+          error: "Failed to update user",
         });
       }
-
-      return reply.status(500).send({
-        success: false,
-        error: "Failed to update user",
-      });
     }
-  });
+  );
 
   // DELETE /api/users/:id - Delete user
   fastify.delete<{ Params: { id: string } }>(
     "/users/:id",
+    {
+      schema: {
+        description: "Delete a user",
+        tags: ["users"],
+        params: IdParamSchema,
+        response: {
+          200: DeleteResponseSchema,
+          404: {
+            description: "User not found",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              error: { type: "string", example: "User not found" },
+            },
+          },
+          500: ErrorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       try {
         const id = parseInt(request.params.id);
@@ -164,4 +283,3 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
 };
 
 export default usersModule;
-

@@ -1,5 +1,14 @@
 import { FastifyPluginAsync } from "fastify";
 import { DatabaseService } from "../../core/database.service.js";
+import {
+  ProductSchema,
+  CreateProductSchema,
+  UpdateProductSchema,
+  ErrorResponseSchema,
+  DeleteResponseSchema,
+  IdParamSchema,
+  ProductSearchQuerySchema,
+} from "../../schemas/index.js";
 
 const productsModule: FastifyPluginAsync = async (fastify, options) => {
   const dbService = new DatabaseService(fastify.prisma);
@@ -11,38 +20,95 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
       limit?: string;
       search?: string;
     };
-  }>("/products", async (request, reply) => {
-    try {
-      const page = parseInt(request.query.page || "1");
-      const limit = parseInt(request.query.limit || "10");
-      const skip = (page - 1) * limit;
-
-      const products = await dbService.getAllProducts(
-        skip,
-        limit,
-        request.query.search
-      );
-
-      return reply.send({
-        success: true,
-        data: products,
-        pagination: {
-          page,
-          limit,
+  }>(
+    "/products",
+    {
+      schema: {
+        description: "Get all products with pagination and optional search",
+        tags: ["products"],
+        querystring: ProductSearchQuerySchema,
+        response: {
+          200: {
+            description: "Successful response",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: true },
+              data: {
+                type: "array",
+                items: ProductSchema,
+              },
+              pagination: {
+                type: "object",
+                properties: {
+                  page: { type: "integer", example: 1 },
+                  limit: { type: "integer", example: 10 },
+                },
+              },
+            },
+          },
+          500: ErrorResponseSchema,
         },
-      });
-    } catch (error) {
-      fastify.log.error(error);
-      return reply.status(500).send({
-        success: false,
-        error: "Failed to fetch products",
-      });
+      },
+    },
+    async (request, reply) => {
+      try {
+        const page = parseInt(request.query.page || "1");
+        const limit = parseInt(request.query.limit || "10");
+        const skip = (page - 1) * limit;
+
+        const products = await dbService.getAllProducts(
+          skip,
+          limit,
+          request.query.search
+        );
+
+        return reply.send({
+          success: true,
+          data: products,
+          pagination: {
+            page,
+            limit,
+          },
+        });
+      } catch (error) {
+        fastify.log.error(error);
+        return reply.status(500).send({
+          success: false,
+          error: "Failed to fetch products",
+        });
+      }
     }
-  });
+  );
 
   // GET /api/products/:id - Get product by ID
   fastify.get<{ Params: { id: string } }>(
     "/products/:id",
+    {
+      schema: {
+        description: "Get a single product by ID",
+        tags: ["products"],
+        params: IdParamSchema,
+        response: {
+          200: {
+            description: "Successful response",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: true },
+              data: ProductSchema,
+            },
+          },
+          404: {
+            description: "Product not found",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              error: { type: "string", example: "Product not found" },
+            },
+          },
+          500: ErrorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       try {
         const id = parseInt(request.params.id);
@@ -81,15 +147,19 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
     "/products",
     {
       schema: {
-        body: {
-          type: "object",
-          required: ["name", "price"],
-          properties: {
-            name: { type: "string" },
-            description: { type: "string" },
-            price: { type: "number", minimum: 0 },
-            stock: { type: "number", minimum: 0 },
+        description: "Create a new product",
+        tags: ["products"],
+        body: CreateProductSchema,
+        response: {
+          201: {
+            description: "Product created successfully",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: true },
+              data: ProductSchema,
+            },
           },
+          500: ErrorResponseSchema,
         },
       },
     },
@@ -119,35 +189,84 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
       price?: number;
       stock?: number;
     };
-  }>("/products/:id", async (request, reply) => {
-    try {
-      const id = parseInt(request.params.id);
-      const product = await dbService.updateProduct(id, request.body);
+  }>(
+    "/products/:id",
+    {
+      schema: {
+        description: "Update an existing product",
+        tags: ["products"],
+        params: IdParamSchema,
+        body: UpdateProductSchema,
+        response: {
+          200: {
+            description: "Product updated successfully",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: true },
+              data: ProductSchema,
+            },
+          },
+          404: {
+            description: "Product not found",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              error: { type: "string", example: "Product not found" },
+            },
+          },
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const id = parseInt(request.params.id);
+        const product = await dbService.updateProduct(id, request.body);
 
-      return reply.send({
-        success: true,
-        data: product,
-      });
-    } catch (error: any) {
-      fastify.log.error(error);
+        return reply.send({
+          success: true,
+          data: product,
+        });
+      } catch (error: any) {
+        fastify.log.error(error);
 
-      if (error.code === "P2025") {
-        return reply.status(404).send({
+        if (error.code === "P2025") {
+          return reply.status(404).send({
+            success: false,
+            error: "Product not found",
+          });
+        }
+
+        return reply.status(500).send({
           success: false,
-          error: "Product not found",
+          error: "Failed to update product",
         });
       }
-
-      return reply.status(500).send({
-        success: false,
-        error: "Failed to update product",
-      });
     }
-  });
+  );
 
   // DELETE /api/products/:id - Delete product
   fastify.delete<{ Params: { id: string } }>(
     "/products/:id",
+    {
+      schema: {
+        description: "Delete a product",
+        tags: ["products"],
+        params: IdParamSchema,
+        response: {
+          200: DeleteResponseSchema,
+          404: {
+            description: "Product not found",
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              error: { type: "string", example: "Product not found" },
+            },
+          },
+          500: ErrorResponseSchema,
+        },
+      },
+    },
     async (request, reply) => {
       try {
         const id = parseInt(request.params.id);
@@ -177,4 +296,3 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
 };
 
 export default productsModule;
-
