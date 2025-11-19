@@ -1,7 +1,7 @@
 import { config } from "./core/config.js";
 import { buildApp } from "./app.js";
 
-const app = buildApp();
+const app = await buildApp();
 const host = config.host;
 const port = config.port;
 

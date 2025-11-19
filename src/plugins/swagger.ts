@@ -82,5 +82,5 @@ const swaggerPlugin: FastifyPluginAsync = async (fastify, options) => {
 
 export default fp(swaggerPlugin, {
   name: "swagger",
+  dependencies: ["database"], // Ensure database is loaded before swagger
 });
-
