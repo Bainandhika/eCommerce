@@ -24,7 +24,7 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
             description: "Successful response",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
+              success: { type: "boolean" },
               data: {
                 type: "array",
                 items: UserSchema,
@@ -65,7 +65,7 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
             description: "Successful response",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
+              success: { type: "boolean" },
               data: UserSchema,
             },
           },
@@ -73,8 +73,8 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
             description: "User not found",
             type: "object",
             properties: {
-              success: { type: "boolean", example: false },
-              error: { type: "string", example: "User not found" },
+              success: { type: "boolean" },
+              error: { type: "string" },
             },
           },
           500: ErrorResponseSchema,
@@ -126,7 +126,7 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
             description: "User created successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
+              success: { type: "boolean" },
               data: UserSchema,
             },
           },
@@ -134,8 +134,8 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
             description: "Email already exists",
             type: "object",
             properties: {
-              success: { type: "boolean", example: false },
-              error: { type: "string", example: "Email already exists" },
+              success: { type: "boolean" },
+              error: { type: "string" },
             },
           },
           500: ErrorResponseSchema,
@@ -189,7 +189,7 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
             description: "User updated successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
+              success: { type: "boolean" },
               data: UserSchema,
             },
           },
@@ -197,8 +197,8 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
             description: "User not found",
             type: "object",
             properties: {
-              success: { type: "boolean", example: false },
-              error: { type: "string", example: "User not found" },
+              success: { type: "boolean" },
+              error: { type: "string" },
             },
           },
           500: ErrorResponseSchema,
@@ -246,8 +246,8 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
             description: "User not found",
             type: "object",
             properties: {
-              success: { type: "boolean", example: false },
-              error: { type: "string", example: "User not found" },
+              success: { type: "boolean" },
+              error: { type: "string" },
             },
           },
           500: ErrorResponseSchema,

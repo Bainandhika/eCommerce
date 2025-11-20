@@ -32,7 +32,7 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
             description: "Successful response",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
+              success: { type: "boolean" },
               data: {
                 type: "array",
                 items: ProductSchema,
@@ -40,8 +40,8 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
               pagination: {
                 type: "object",
                 properties: {
-                  page: { type: "integer", example: 1 },
-                  limit: { type: "integer", example: 10 },
+                  page: { type: "integer" },
+                  limit: { type: "integer" },
                 },
               },
             },
@@ -93,7 +93,7 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
             description: "Successful response",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
+              success: { type: "boolean" },
               data: ProductSchema,
             },
           },
@@ -101,8 +101,8 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
             description: "Product not found",
             type: "object",
             properties: {
-              success: { type: "boolean", example: false },
-              error: { type: "string", example: "Product not found" },
+              success: { type: "boolean" },
+              error: { type: "string" },
             },
           },
           500: ErrorResponseSchema,
@@ -155,7 +155,7 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
             description: "Product created successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
+              success: { type: "boolean" },
               data: ProductSchema,
             },
           },
@@ -202,7 +202,7 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
             description: "Product updated successfully",
             type: "object",
             properties: {
-              success: { type: "boolean", example: true },
+              success: { type: "boolean" },
               data: ProductSchema,
             },
           },
@@ -210,8 +210,8 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
             description: "Product not found",
             type: "object",
             properties: {
-              success: { type: "boolean", example: false },
-              error: { type: "string", example: "Product not found" },
+              success: { type: "boolean" },
+              error: { type: "string" },
             },
           },
           500: ErrorResponseSchema,
@@ -260,8 +260,8 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
             description: "Product not found",
             type: "object",
             properties: {
-              success: { type: "boolean", example: false },
-              error: { type: "string", example: "Product not found" },
+              success: { type: "boolean" },
+              error: { type: "string" },
             },
           },
           500: ErrorResponseSchema,
