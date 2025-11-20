@@ -1,32 +1,24 @@
 import { FastifyPluginAsync } from "fastify";
 import { DatabaseService } from "../../core/database.service.js";
 import {
-  ProductSchema,
-  CreateProductSchema,
-  UpdateProductSchema,
+  CourierSchema,
+  CreateCourierSchema,
+  UpdateCourierSchema,
   ErrorResponseSchema,
   DeleteResponseSchema,
   IdParamSchema,
-  ProductSearchQuerySchema,
 } from "../../schemas/index.js";
 
-const productsModule: FastifyPluginAsync = async (fastify, options) => {
+const couriersModule: FastifyPluginAsync = async (fastify) => {
   const dbService = new DatabaseService(fastify.mysql);
 
-  // GET /api/products - Get all products
-  fastify.get<{
-    Querystring: {
-      page?: string;
-      limit?: string;
-      search?: string;
-    };
-  }>(
-    "/products",
+  // GET /api/couriers - Get all couriers
+  fastify.get(
+    "/couriers",
     {
       schema: {
-        description: "Get all products with pagination and optional search",
-        tags: ["products"],
-        querystring: ProductSearchQuerySchema,
+        description: "Get all couriers",
+        tags: ["couriers"],
         response: {
           200: {
             description: "Successful response",
@@ -35,14 +27,7 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
               success: { type: "boolean" },
               data: {
                 type: "array",
-                items: ProductSchema,
-              },
-              pagination: {
-                type: "object",
-                properties: {
-                  page: { type: "integer" },
-                  limit: { type: "integer" },
-                },
+                items: CourierSchema,
               },
             },
           },
@@ -50,43 +35,30 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
         },
       },
     },
-    async (request, reply) => {
+    async (_request, reply) => {
       try {
-        const page = parseInt(request.query.page || "1");
-        const limit = parseInt(request.query.limit || "10");
-        const skip = (page - 1) * limit;
-
-        const products = await dbService.getAllProducts(
-          skip,
-          limit,
-          request.query.search
-        );
-
+        const couriers = await dbService.getAllCouriers();
         return reply.send({
           success: true,
-          data: products,
-          pagination: {
-            page,
-            limit,
-          },
+          data: couriers,
         });
       } catch (error) {
         fastify.log.error(error);
         return reply.status(500).send({
           success: false,
-          error: "Failed to fetch products",
+          error: "Failed to fetch couriers",
         });
       }
     }
   );
 
-  // GET /api/products/:id - Get product by ID
+  // GET /api/couriers/:id - Get courier by ID
   fastify.get<{ Params: { id: string } }>(
-    "/products/:id",
+    "/couriers/:id",
     {
       schema: {
-        description: "Get a single product by ID",
-        tags: ["products"],
+        description: "Get a single courier by ID",
+        tags: ["couriers"],
         params: IdParamSchema,
         response: {
           200: {
@@ -94,11 +66,11 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
             type: "object",
             properties: {
               success: { type: "boolean" },
-              data: ProductSchema,
+              data: CourierSchema,
             },
           },
           404: {
-            description: "Product not found",
+            description: "Courier not found",
             type: "object",
             properties: {
               success: { type: "boolean" },
@@ -112,50 +84,50 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
     async (request, reply) => {
       try {
         const id = request.params.id;
-        const product = await dbService.findProductById(id);
+        const courier = await dbService.findCourierById(id);
 
-        if (!product) {
+        if (!courier) {
           return reply.status(404).send({
             success: false,
-            error: "Product not found",
+            error: "Courier not found",
           });
         }
 
         return reply.send({
           success: true,
-          data: product,
+          data: courier,
         });
       } catch (error) {
         fastify.log.error(error);
         return reply.status(500).send({
           success: false,
-          error: "Failed to fetch product",
+          error: "Failed to fetch courier",
         });
       }
     }
   );
 
-  // POST /api/products - Create new product
+  // POST /api/couriers - Create new courier
   fastify.post<{
     Body: {
-      name: string;
-      price: string;
-      quantity?: number;
+      courier_id: string;
+      name?: string;
+      is_available?: number;
     };
   }>(
-    "/products",
+    "/couriers",
     {
       schema: {
-        description: "Create a new product",
-        tags: ["products"],
-        body: CreateProductSchema,
+        description: "Create a new courier",
+        tags: ["couriers"],
+        body: CreateCourierSchema,
         response: {
           201: {
-            description: "Product created successfully",
+            description: "Courier created successfully",
             type: "object",
             properties: {
               success: { type: "boolean" },
-              data: ProductSchema,
+              data: CourierSchema,
             },
           },
           500: ErrorResponseSchema,
@@ -164,48 +136,47 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
     },
     async (request, reply) => {
       try {
-        const product = await dbService.createProduct(request.body);
+        const courier = await dbService.createCourier(request.body);
         return reply.status(201).send({
           success: true,
-          data: product,
+          data: courier,
         });
       } catch (error) {
         fastify.log.error(error);
         return reply.status(500).send({
           success: false,
-          error: "Failed to create product",
+          error: "Failed to create courier",
         });
       }
     }
   );
 
-  // PUT /api/products/:id - Update product
+  // PUT /api/couriers/:id - Update courier
   fastify.put<{
     Params: { id: string };
     Body: {
       name?: string;
-      price?: string;
-      quantity?: number;
+      is_available?: number;
     };
   }>(
-    "/products/:id",
+    "/couriers/:id",
     {
       schema: {
-        description: "Update an existing product",
-        tags: ["products"],
+        description: "Update an existing courier",
+        tags: ["couriers"],
         params: IdParamSchema,
-        body: UpdateProductSchema,
+        body: UpdateCourierSchema,
         response: {
           200: {
-            description: "Product updated successfully",
+            description: "Courier updated successfully",
             type: "object",
             properties: {
               success: { type: "boolean" },
-              data: ProductSchema,
+              data: CourierSchema,
             },
           },
           404: {
-            description: "Product not found",
+            description: "Courier not found",
             type: "object",
             properties: {
               success: { type: "boolean" },
@@ -219,43 +190,42 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
     async (request, reply) => {
       try {
         const id = request.params.id;
-        const product = await dbService.updateProduct(id, request.body);
+        const courier = await dbService.updateCourier(id, request.body);
 
         return reply.send({
           success: true,
-          data: product,
+          data: courier,
         });
       } catch (error: any) {
         fastify.log.error(error);
 
-        // Handle not found error
-        if (error.message === "Product not found") {
+        if (error.message === "Courier not found") {
           return reply.status(404).send({
             success: false,
-            error: "Product not found",
+            error: "Courier not found",
           });
         }
 
         return reply.status(500).send({
           success: false,
-          error: "Failed to update product",
+          error: "Failed to update courier",
         });
       }
     }
   );
 
-  // DELETE /api/products/:id - Delete product
+  // DELETE /api/couriers/:id - Delete courier
   fastify.delete<{ Params: { id: string } }>(
-    "/products/:id",
+    "/couriers/:id",
     {
       schema: {
-        description: "Delete a product",
-        tags: ["products"],
+        description: "Delete a courier",
+        tags: ["couriers"],
         params: IdParamSchema,
         response: {
           200: DeleteResponseSchema,
           404: {
-            description: "Product not found",
+            description: "Courier not found",
             type: "object",
             properties: {
               success: { type: "boolean" },
@@ -269,30 +239,29 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
     async (request, reply) => {
       try {
         const id = request.params.id;
-        await dbService.deleteProduct(id);
+        await dbService.deleteCourier(id);
 
         return reply.send({
           success: true,
-          message: "Product deleted successfully",
+          message: "Courier deleted successfully",
         });
       } catch (error: any) {
         fastify.log.error(error);
 
-        // Handle not found error
-        if (error.message === "Product not found") {
+        if (error.message === "Courier not found") {
           return reply.status(404).send({
             success: false,
-            error: "Product not found",
+            error: "Courier not found",
           });
         }
 
         return reply.status(500).send({
           success: false,
-          error: "Failed to delete product",
+          error: "Failed to delete courier",
         });
       }
     }
   );
 };
 
-export default productsModule;
+export default couriersModule;

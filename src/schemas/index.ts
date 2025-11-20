@@ -8,8 +8,8 @@
 export const UserSchema = {
   type: "object",
   properties: {
-    id: {
-      type: "integer",
+    user_id: {
+      type: "string",
       description: "User ID",
     },
     email: {
@@ -17,23 +17,21 @@ export const UserSchema = {
       format: "email",
       description: "User email address",
     },
-    name: {
-      type: "string",
-      nullable: true,
-      description: "User full name",
-    },
     password: {
       type: "string",
       description: "User password (hashed)",
     },
-    createdAt: {
+    address: {
       type: "string",
-      format: "date-time",
+      nullable: true,
+      description: "User address",
+    },
+    created_at: {
+      type: "string",
       description: "User creation timestamp",
     },
-    updatedAt: {
+    updated_at: {
       type: "string",
-      format: "date-time",
       description: "User last update timestamp",
     },
   },
@@ -48,14 +46,14 @@ export const CreateUserSchema = {
       format: "email",
       description: "User email address",
     },
-    name: {
-      type: "string",
-      description: "User full name",
-    },
     password: {
       type: "string",
       minLength: 6,
       description: "User password (minimum 6 characters)",
+    },
+    address: {
+      type: "string",
+      description: "User address",
     },
   },
 } as const;
@@ -68,14 +66,14 @@ export const UpdateUserSchema = {
       format: "email",
       description: "User email address",
     },
-    name: {
-      type: "string",
-      description: "User full name",
-    },
     password: {
       type: "string",
       minLength: 6,
       description: "User password",
+    },
+    address: {
+      type: "string",
+      description: "User address",
     },
   },
 } as const;
@@ -85,36 +83,28 @@ export const UpdateUserSchema = {
 export const ProductSchema = {
   type: "object",
   properties: {
-    id: {
-      type: "integer",
+    product_id: {
+      type: "string",
       description: "Product ID",
     },
     name: {
       type: "string",
       description: "Product name",
     },
-    description: {
-      type: "string",
-      nullable: true,
-      description: "Product description",
-    },
     price: {
-      type: "number",
-      format: "decimal",
+      type: "string",
       description: "Product price",
     },
-    stock: {
+    quantity: {
       type: "integer",
-      description: "Available stock quantity",
+      description: "Available quantity",
     },
-    createdAt: {
+    created_at: {
       type: "string",
-      format: "date-time",
       description: "Product creation timestamp",
     },
-    updatedAt: {
+    updated_at: {
       type: "string",
-      format: "date-time",
       description: "Product last update timestamp",
     },
   },
@@ -128,19 +118,14 @@ export const CreateProductSchema = {
       type: "string",
       description: "Product name",
     },
-    description: {
-      type: "string",
-      description: "Product description",
-    },
     price: {
-      type: "number",
-      minimum: 0,
-      description: "Product price (must be positive)",
+      type: "string",
+      description: "Product price",
     },
-    stock: {
+    quantity: {
       type: "integer",
       minimum: 0,
-      description: "Initial stock quantity",
+      description: "Initial quantity",
     },
   },
 } as const;
@@ -152,19 +137,14 @@ export const UpdateProductSchema = {
       type: "string",
       description: "Product name",
     },
-    description: {
-      type: "string",
-      description: "Product description",
-    },
     price: {
-      type: "number",
-      minimum: 0,
+      type: "string",
       description: "Product price",
     },
-    stock: {
+    quantity: {
       type: "integer",
       minimum: 0,
-      description: "Stock quantity",
+      description: "Product quantity",
     },
   },
 } as const;
@@ -264,7 +244,246 @@ export const ProductSearchQuerySchema = {
     },
     search: {
       type: "string",
-      description: "Search term for product name or description",
+      description: "Search term for product name",
+    },
+  },
+} as const;
+
+// ==================== COURIER SCHEMAS ====================
+
+export const CourierSchema = {
+  type: "object",
+  properties: {
+    courier_id: {
+      type: "string",
+      description: "Courier ID",
+    },
+    name: {
+      type: "string",
+      nullable: true,
+      description: "Courier name",
+    },
+    is_available: {
+      type: "integer",
+      description: "Courier availability status (0 or 1)",
+    },
+  },
+} as const;
+
+export const CreateCourierSchema = {
+  type: "object",
+  required: ["courier_id"],
+  properties: {
+    courier_id: {
+      type: "string",
+      description: "Courier ID",
+    },
+    name: {
+      type: "string",
+      description: "Courier name",
+    },
+    is_available: {
+      type: "integer",
+      description: "Courier availability status (0 or 1)",
+    },
+  },
+} as const;
+
+export const UpdateCourierSchema = {
+  type: "object",
+  properties: {
+    name: {
+      type: "string",
+      description: "Courier name",
+    },
+    is_available: {
+      type: "integer",
+      description: "Courier availability status (0 or 1)",
+    },
+  },
+} as const;
+
+// ==================== ORDER SCHEMAS ====================
+
+export const OrderSchema = {
+  type: "object",
+  properties: {
+    order_id: {
+      type: "string",
+      description: "Order ID",
+    },
+    user_id: {
+      type: "string",
+      nullable: true,
+      description: "User ID",
+    },
+    product_id: {
+      type: "string",
+      nullable: true,
+      description: "Product ID",
+    },
+    order_quantity: {
+      type: "integer",
+      nullable: true,
+      description: "Order quantity",
+    },
+    status: {
+      type: "string",
+      enum: ["PAID", "IN TRANSIT", "DELIVERED"],
+      nullable: true,
+      description: "Order status",
+    },
+    created_at: {
+      type: "string",
+      nullable: true,
+      description: "Order creation timestamp",
+    },
+    updated_at: {
+      type: "string",
+      nullable: true,
+      description: "Order last update timestamp",
+    },
+  },
+} as const;
+
+export const CreateOrderSchema = {
+  type: "object",
+  required: ["order_id"],
+  properties: {
+    order_id: {
+      type: "string",
+      description: "Order ID",
+    },
+    user_id: {
+      type: "string",
+      description: "User ID",
+    },
+    product_id: {
+      type: "string",
+      description: "Product ID",
+    },
+    order_quantity: {
+      type: "integer",
+      description: "Order quantity",
+    },
+    status: {
+      type: "string",
+      enum: ["PAID", "IN TRANSIT", "DELIVERED"],
+      description: "Order status",
+    },
+  },
+} as const;
+
+export const UpdateOrderSchema = {
+  type: "object",
+  properties: {
+    user_id: {
+      type: "string",
+      description: "User ID",
+    },
+    product_id: {
+      type: "string",
+      description: "Product ID",
+    },
+    order_quantity: {
+      type: "integer",
+      description: "Order quantity",
+    },
+    status: {
+      type: "string",
+      enum: ["PAID", "IN TRANSIT", "DELIVERED"],
+      description: "Order status",
+    },
+  },
+} as const;
+
+// ==================== DELIVERY SCHEMAS ====================
+
+export const DeliverySchema = {
+  type: "object",
+  properties: {
+    delivery_id: {
+      type: "string",
+      description: "Delivery ID",
+    },
+    order_id: {
+      type: "string",
+      nullable: true,
+      description: "Order ID",
+    },
+    courier_id: {
+      type: "string",
+      nullable: true,
+      description: "Courier ID",
+    },
+    pick_up_date: {
+      type: "string",
+      nullable: true,
+      description: "Pick up date",
+    },
+    delivered_date: {
+      type: "string",
+      nullable: true,
+      description: "Delivered date",
+    },
+    created_at: {
+      type: "string",
+      nullable: true,
+      description: "Delivery creation timestamp",
+    },
+    updated_at: {
+      type: "string",
+      nullable: true,
+      description: "Delivery last update timestamp",
+    },
+  },
+} as const;
+
+export const CreateDeliverySchema = {
+  type: "object",
+  required: ["delivery_id"],
+  properties: {
+    delivery_id: {
+      type: "string",
+      description: "Delivery ID",
+    },
+    order_id: {
+      type: "string",
+      description: "Order ID",
+    },
+    courier_id: {
+      type: "string",
+      description: "Courier ID",
+    },
+    pick_up_date: {
+      type: "string",
+      description: "Pick up date",
+    },
+    delivered_date: {
+      type: "string",
+      description: "Delivered date",
+    },
+  },
+} as const;
+
+export const UpdateDeliverySchema = {
+  type: "object",
+  properties: {
+    order_id: {
+      type: "string",
+      description: "Order ID",
+    },
+    courier_id: {
+      type: "string",
+      description: "Courier ID",
+    },
+    pick_up_date: {
+      type: "string",
+      description: "Pick up date",
+    },
+    delivered_date: {
+      type: "string",
+      description: "Delivered date",
     },
   },
 } as const;

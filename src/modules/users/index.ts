@@ -83,7 +83,7 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
     },
     async (request, reply) => {
       try {
-        const id = parseInt(request.params.id);
+        const id = request.params.id;
         const user = await dbService.findUserById(id);
 
         if (!user) {
@@ -207,7 +207,7 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
     },
     async (request, reply) => {
       try {
-        const id = parseInt(request.params.id);
+        const id = request.params.id;
         const user = await dbService.updateUser(id, request.body);
 
         return reply.send({
@@ -256,7 +256,7 @@ const usersModule: FastifyPluginAsync = async (fastify, options) => {
     },
     async (request, reply) => {
       try {
-        const id = parseInt(request.params.id);
+        const id = request.params.id;
         await dbService.deleteUser(id);
 
         return reply.send({

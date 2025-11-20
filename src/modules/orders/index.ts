@@ -1,32 +1,24 @@
 import { FastifyPluginAsync } from "fastify";
 import { DatabaseService } from "../../core/database.service.js";
 import {
-  ProductSchema,
-  CreateProductSchema,
-  UpdateProductSchema,
+  OrderSchema,
+  CreateOrderSchema,
+  UpdateOrderSchema,
   ErrorResponseSchema,
   DeleteResponseSchema,
   IdParamSchema,
-  ProductSearchQuerySchema,
 } from "../../schemas/index.js";
 
-const productsModule: FastifyPluginAsync = async (fastify, options) => {
+const ordersModule: FastifyPluginAsync = async (fastify) => {
   const dbService = new DatabaseService(fastify.mysql);
 
-  // GET /api/products - Get all products
-  fastify.get<{
-    Querystring: {
-      page?: string;
-      limit?: string;
-      search?: string;
-    };
-  }>(
-    "/products",
+  // GET /api/orders - Get all orders
+  fastify.get(
+    "/orders",
     {
       schema: {
-        description: "Get all products with pagination and optional search",
-        tags: ["products"],
-        querystring: ProductSearchQuerySchema,
+        description: "Get all orders",
+        tags: ["orders"],
         response: {
           200: {
             description: "Successful response",
@@ -35,14 +27,7 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
               success: { type: "boolean" },
               data: {
                 type: "array",
-                items: ProductSchema,
-              },
-              pagination: {
-                type: "object",
-                properties: {
-                  page: { type: "integer" },
-                  limit: { type: "integer" },
-                },
+                items: OrderSchema,
               },
             },
           },
@@ -50,43 +35,30 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
         },
       },
     },
-    async (request, reply) => {
+    async (_request, reply) => {
       try {
-        const page = parseInt(request.query.page || "1");
-        const limit = parseInt(request.query.limit || "10");
-        const skip = (page - 1) * limit;
-
-        const products = await dbService.getAllProducts(
-          skip,
-          limit,
-          request.query.search
-        );
-
+        const orders = await dbService.getAllOrders();
         return reply.send({
           success: true,
-          data: products,
-          pagination: {
-            page,
-            limit,
-          },
+          data: orders,
         });
       } catch (error) {
         fastify.log.error(error);
         return reply.status(500).send({
           success: false,
-          error: "Failed to fetch products",
+          error: "Failed to fetch orders",
         });
       }
     }
   );
 
-  // GET /api/products/:id - Get product by ID
+  // GET /api/orders/:id - Get order by ID
   fastify.get<{ Params: { id: string } }>(
-    "/products/:id",
+    "/orders/:id",
     {
       schema: {
-        description: "Get a single product by ID",
-        tags: ["products"],
+        description: "Get a single order by ID",
+        tags: ["orders"],
         params: IdParamSchema,
         response: {
           200: {
@@ -94,11 +66,11 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
             type: "object",
             properties: {
               success: { type: "boolean" },
-              data: ProductSchema,
+              data: OrderSchema,
             },
           },
           404: {
-            description: "Product not found",
+            description: "Order not found",
             type: "object",
             properties: {
               success: { type: "boolean" },
@@ -112,50 +84,52 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
     async (request, reply) => {
       try {
         const id = request.params.id;
-        const product = await dbService.findProductById(id);
+        const order = await dbService.findOrderById(id);
 
-        if (!product) {
+        if (!order) {
           return reply.status(404).send({
             success: false,
-            error: "Product not found",
+            error: "Order not found",
           });
         }
 
         return reply.send({
           success: true,
-          data: product,
+          data: order,
         });
       } catch (error) {
         fastify.log.error(error);
         return reply.status(500).send({
           success: false,
-          error: "Failed to fetch product",
+          error: "Failed to fetch order",
         });
       }
     }
   );
 
-  // POST /api/products - Create new product
+  // POST /api/orders - Create new order
   fastify.post<{
     Body: {
-      name: string;
-      price: string;
-      quantity?: number;
+      order_id: string;
+      user_id?: string;
+      product_id?: string;
+      order_quantity?: number;
+      status?: "PAID" | "IN TRANSIT" | "DELIVERED";
     };
   }>(
-    "/products",
+    "/orders",
     {
       schema: {
-        description: "Create a new product",
-        tags: ["products"],
-        body: CreateProductSchema,
+        description: "Create a new order",
+        tags: ["orders"],
+        body: CreateOrderSchema,
         response: {
           201: {
-            description: "Product created successfully",
+            description: "Order created successfully",
             type: "object",
             properties: {
               success: { type: "boolean" },
-              data: ProductSchema,
+              data: OrderSchema,
             },
           },
           500: ErrorResponseSchema,
@@ -164,48 +138,49 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
     },
     async (request, reply) => {
       try {
-        const product = await dbService.createProduct(request.body);
+        const order = await dbService.createOrder(request.body);
         return reply.status(201).send({
           success: true,
-          data: product,
+          data: order,
         });
       } catch (error) {
         fastify.log.error(error);
         return reply.status(500).send({
           success: false,
-          error: "Failed to create product",
+          error: "Failed to create order",
         });
       }
     }
   );
 
-  // PUT /api/products/:id - Update product
+  // PUT /api/orders/:id - Update order
   fastify.put<{
     Params: { id: string };
     Body: {
-      name?: string;
-      price?: string;
-      quantity?: number;
+      user_id?: string;
+      product_id?: string;
+      order_quantity?: number;
+      status?: "PAID" | "IN TRANSIT" | "DELIVERED";
     };
   }>(
-    "/products/:id",
+    "/orders/:id",
     {
       schema: {
-        description: "Update an existing product",
-        tags: ["products"],
+        description: "Update an existing order",
+        tags: ["orders"],
         params: IdParamSchema,
-        body: UpdateProductSchema,
+        body: UpdateOrderSchema,
         response: {
           200: {
-            description: "Product updated successfully",
+            description: "Order updated successfully",
             type: "object",
             properties: {
               success: { type: "boolean" },
-              data: ProductSchema,
+              data: OrderSchema,
             },
           },
           404: {
-            description: "Product not found",
+            description: "Order not found",
             type: "object",
             properties: {
               success: { type: "boolean" },
@@ -219,43 +194,42 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
     async (request, reply) => {
       try {
         const id = request.params.id;
-        const product = await dbService.updateProduct(id, request.body);
+        const order = await dbService.updateOrder(id, request.body);
 
         return reply.send({
           success: true,
-          data: product,
+          data: order,
         });
       } catch (error: any) {
         fastify.log.error(error);
 
-        // Handle not found error
-        if (error.message === "Product not found") {
+        if (error.message === "Order not found") {
           return reply.status(404).send({
             success: false,
-            error: "Product not found",
+            error: "Order not found",
           });
         }
 
         return reply.status(500).send({
           success: false,
-          error: "Failed to update product",
+          error: "Failed to update order",
         });
       }
     }
   );
 
-  // DELETE /api/products/:id - Delete product
+  // DELETE /api/orders/:id - Delete order
   fastify.delete<{ Params: { id: string } }>(
-    "/products/:id",
+    "/orders/:id",
     {
       schema: {
-        description: "Delete a product",
-        tags: ["products"],
+        description: "Delete an order",
+        tags: ["orders"],
         params: IdParamSchema,
         response: {
           200: DeleteResponseSchema,
           404: {
-            description: "Product not found",
+            description: "Order not found",
             type: "object",
             properties: {
               success: { type: "boolean" },
@@ -269,30 +243,29 @@ const productsModule: FastifyPluginAsync = async (fastify, options) => {
     async (request, reply) => {
       try {
         const id = request.params.id;
-        await dbService.deleteProduct(id);
+        await dbService.deleteOrder(id);
 
         return reply.send({
           success: true,
-          message: "Product deleted successfully",
+          message: "Order deleted successfully",
         });
       } catch (error: any) {
         fastify.log.error(error);
 
-        // Handle not found error
-        if (error.message === "Product not found") {
+        if (error.message === "Order not found") {
           return reply.status(404).send({
             success: false,
-            error: "Product not found",
+            error: "Order not found",
           });
         }
 
         return reply.status(500).send({
           success: false,
-          error: "Failed to delete product",
+          error: "Failed to delete order",
         });
       }
     }
   );
 };
 
-export default productsModule;
+export default ordersModule;
