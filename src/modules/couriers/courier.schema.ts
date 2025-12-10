@@ -8,8 +8,8 @@ export const CourierSchema = z.object({
     })
     .min(1, { message: "Name is required" })
     .max(255, { message: "Name must be 255 characters or less" }),
-  is_available: z.enum(["0", "1"]).nullable(),
-  created_at: z.iso.datetime().nullable(),
+  is_available: z.enum(["0", "1"]),
+  created_at: z.iso.datetime(),
   updated_at: z.iso.datetime().nullable(),
 });
 
