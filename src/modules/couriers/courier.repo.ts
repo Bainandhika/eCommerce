@@ -9,9 +9,12 @@ export class CourierRepo {
   constructor(private readonly pool: Pool) {}
 
   async createCourier(data: CreateCourierInput): Promise<Courier> {
+    const now = new Date().toISOString();
+    const isAvailable = 1;
+
     await this.pool.execute<ResultSetHeader>(
-      "INSERT INTO courier (courier_id, name, is_available) VALUES (?, ?, ?)",
-      [data.courier_id, data.name, data.is_available]
+      "INSERT INTO courier (courier_id, name, is_available, created_at, updated_at) VALUES (?, ?, ?)",
+      [data.courier_id, data.name, isAvailable, now, now]
     );
 
     const [rows] = await this.pool.execute<RowDataPacket[]>(
@@ -53,7 +56,8 @@ export class CourierRepo {
       values.push(data.is_available);
     }
 
-    values.push(id);
+    updates.push("updated_at = ?");
+    values.push(new Date().toISOString(), id);
 
     await this.pool.execute(
       `UPDATE courier SET ${updates.join(", ")} WHERE courier_id = ?`,
