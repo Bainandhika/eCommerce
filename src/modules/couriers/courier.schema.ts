@@ -1,11 +1,16 @@
 import z from "zod";
 
 export const CourierSchema = z.object({
-  courier_id: z.string(),
-  name: z.string(),
-  is_available: z.number().nullable(),
-  created_at: z.string().nullable(),
-  updated_at: z.string().nullable(),
+  courier_id: z.uuidv4(),
+  name: z
+    .string({
+      message: "Name must be a string",
+    })
+    .min(1, { message: "Name is required" })
+    .max(255, { message: "Name must be 255 characters or less" }),
+  is_available: z.enum(["0", "1"]).nullable(),
+  created_at: z.iso.datetime().nullable(),
+  updated_at: z.iso.datetime().nullable(),
 });
 
 export const CreateCourierSchema = CourierSchema.omit({
