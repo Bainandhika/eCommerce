@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const CourierSchema = z.object({
-  courier_id: z.uuidv4(),
+  courier_id: z.uuid(),
   name: z
     .string({
       message: "Name must be a string",
