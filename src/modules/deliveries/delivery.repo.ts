@@ -3,7 +3,7 @@ import {
   CreateDeliveryInput,
   Delivery,
   UpdateDeliveryInput,
-} from "../../core/types/delivery.type.js";
+} from "./delivery.schema.js";
 
 export class DeliveryRepo {
   constructor(private readonly pool: Pool) {}
@@ -90,9 +90,6 @@ export class DeliveryRepo {
     return rows[0] as Delivery;
   }
 
-  /**
-   * Delete delivery
-   */
   async deleteDelivery(id: string): Promise<Delivery> {
     const [rows] = await this.pool.execute<RowDataPacket[]>(
       "SELECT * FROM delivery WHERE delivery_id = ?",
