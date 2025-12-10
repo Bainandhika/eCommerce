@@ -3,7 +3,7 @@ import {
   Courier,
   CreateCourierInput,
   UpdateCourierInput,
-} from "../../core/types/courier.type.js";
+} from "./courier.schema.js";
 
 export class CourierRepo {
   constructor(private readonly pool: Pool) {}
@@ -11,7 +11,7 @@ export class CourierRepo {
   async createCourier(data: CreateCourierInput): Promise<Courier> {
     await this.pool.execute<ResultSetHeader>(
       "INSERT INTO courier (courier_id, name, is_available) VALUES (?, ?, ?)",
-      [data.courier_id, data.name || null, data.is_available || null]
+      [data.courier_id, data.name, data.is_available]
     );
 
     const [rows] = await this.pool.execute<RowDataPacket[]>(
