@@ -1,5 +1,5 @@
 import { Pool, ResultSetHeader, RowDataPacket } from "mysql2/promise";
-import { CreateProductInput, Product, UpdateProductInput } from "../../core/types/product.type.js";
+import { CreateProductInput, Product, UpdateProductInput } from "./product.schema.js";
 
 export class ProductRepo {
   constructor(private readonly pool: Pool) {}
@@ -21,9 +21,6 @@ export class ProductRepo {
     return rows[0] as Product;
   }
 
-  /**
-   * Find product by ID
-   */
   async findProductById(id: string): Promise<Product | null> {
     const [rows] = await this.pool.execute<RowDataPacket[]>(
       "SELECT * FROM product WHERE product_id = ?",
@@ -33,9 +30,6 @@ export class ProductRepo {
     return rows.length > 0 ? (rows[0] as Product) : null;
   }
 
-  /**
-   * Get all products with pagination and optional search
-   */
   async getAllProducts(
     skip = 0,
     take = 10,
@@ -58,9 +52,6 @@ export class ProductRepo {
     return rows as Product[];
   }
 
-  /**
-   * Update product
-   */
   async updateProduct(id: string, data: UpdateProductInput): Promise<Product> {
     const updates: string[] = [];
     const values: any[] = [];
@@ -94,9 +85,6 @@ export class ProductRepo {
     return rows[0] as Product;
   }
 
-  /**
-   * Delete product
-   */
   async deleteProduct(id: string): Promise<Product> {
     const [rows] = await this.pool.execute<RowDataPacket[]>(
       "SELECT * FROM product WHERE product_id = ?",
@@ -114,9 +102,6 @@ export class ProductRepo {
     return product;
   }
 
-  /**
-   * Update product quantity
-   */
   async updateProductQuantity(id: string, quantity: number): Promise<Product> {
     const now = new Date().toISOString();
     await this.pool.execute(

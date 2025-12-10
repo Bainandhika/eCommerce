@@ -11,6 +11,7 @@ export const OrderSchema = z.object({
 });
 
 export const CreateOrderSchema = OrderSchema.omit({
+  order_id: true,
   created_at: true,
   updated_at: true,
 });

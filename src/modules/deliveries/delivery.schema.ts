@@ -11,6 +11,7 @@ export const DeliverySchema = z.object({
 });
 
 export const CreateDeliverySchema = DeliverySchema.omit({
+  delivery_id: true,
   created_at: true,
   updated_at: true,
 });

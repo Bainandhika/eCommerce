@@ -9,7 +9,7 @@ export const CourierSchema = z.object({
 });
 
 export const CreateCourierSchema = CourierSchema.omit({
-  is_available: true,
+  courier_id: true,
   created_at: true,
   updated_at: true,
 });

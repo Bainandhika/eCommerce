@@ -3,7 +3,7 @@ import {
   CreateUserInput,
   UpdateUserInput,
   User,
-} from "../../core/types/user.type.js";
+} from "./user.schema.js";
 
 export class UserRepo {
   constructor(private readonly pool: Pool) {}
@@ -25,9 +25,6 @@ export class UserRepo {
     return rows[0] as User;
   }
 
-  /**
-   * Find user by ID
-   */
   async findUserById(id: string): Promise<User | null> {
     const [rows] = await this.pool.execute<RowDataPacket[]>(
       "SELECT * FROM user WHERE user_id = ?",
@@ -37,9 +34,6 @@ export class UserRepo {
     return rows.length > 0 ? (rows[0] as User) : null;
   }
 
-  /**
-   * Find user by email
-   */
   async findUserByEmail(email: string): Promise<User | null> {
     const [rows] = await this.pool.execute<RowDataPacket[]>(
       "SELECT * FROM user WHERE email = ?",
@@ -49,9 +43,6 @@ export class UserRepo {
     return rows.length > 0 ? (rows[0] as User) : null;
   }
 
-  /**
-   * Get all users with pagination
-   */
   async getAllUsers(skip = 0, take = 10): Promise<User[]> {
     const [rows] = await this.pool.execute<RowDataPacket[]>(
       "SELECT * FROM user ORDER BY created_at DESC LIMIT ? OFFSET ?",
@@ -61,9 +52,6 @@ export class UserRepo {
     return rows as User[];
   }
 
-  /**
-   * Update user
-   */
   async updateUser(id: string, data: UpdateUserInput): Promise<User> {
     const updates: string[] = [];
     const values: any[] = [];
@@ -97,9 +85,6 @@ export class UserRepo {
     return rows[0] as User;
   }
 
-  /**
-   * Delete user
-   */
   async deleteUser(id: string): Promise<User> {
     const [rows] = await this.pool.execute<RowDataPacket[]>(
       "SELECT * FROM user WHERE user_id = ?",
