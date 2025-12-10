@@ -3,7 +3,7 @@ import {
   CreateOrderInput,
   Order,
   UpdateOrderInput,
-} from "../../core/types/order.type.js";
+} from "./order.schema.js";
 
 export class OrderRepo {
   constructor(private readonly pool: Pool) {}
