@@ -4,22 +4,29 @@ import {
   CreateCourierInput,
   UpdateCourierInput,
 } from "./courier.schema.js";
+import { v4 as uuidv4 } from "uuid";
 
 export class CourierRepo {
   constructor(private readonly pool: Pool) {}
 
   async createCourier(data: CreateCourierInput): Promise<Courier> {
     const now = new Date().toISOString();
-    const isAvailable = 1;
+    const courier = {
+      courier_id: uuidv4(),
+      name: data.name,
+      is_available: data.is_available,
+      created_at: now,
+      updated_at: now,
+    };
 
     await this.pool.execute<ResultSetHeader>(
-      "INSERT INTO courier (courier_id, name, is_available, created_at, updated_at) VALUES (?, ?, ?)",
-      [data.courier_id, data.name, isAvailable, now, now]
+      "INSERT INTO courier (courier_id, name, is_available, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+      [courier.courier_id, courier.name, courier.is_available, courier.created_at, courier.updated_at]
     );
 
     const [rows] = await this.pool.execute<RowDataPacket[]>(
       "SELECT * FROM courier WHERE courier_id = ?",
-      [data.courier_id]
+      [courier.courier_id]
     );
 
     return rows[0] as Courier;
