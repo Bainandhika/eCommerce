@@ -4,29 +4,39 @@ import {
   Delivery,
   UpdateDeliveryInput,
 } from "./delivery.schema.js";
+import { v4 as uuidv4 } from "uuid";
 
 export class DeliveryRepo {
   constructor(private readonly pool: Pool) {}
 
   async createDelivery(data: CreateDeliveryInput): Promise<Delivery> {
     const now = new Date().toISOString();
+    const delivery = {
+      delivery_id: uuidv4(),
+      order_id: data.order_id,
+      courier_id: data.courier_id,
+      pick_up_date: data.pick_up_date || null,
+      delivered_date: data.delivered_date || null,
+      created_at: now,
+      updated_at: now,
+    };
 
     await this.pool.execute<ResultSetHeader>(
       "INSERT INTO delivery (delivery_id, order_id, courier_id, pick_up_date, delivered_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
-        data.delivery_id,
-        data.order_id || null,
-        data.courier_id || null,
-        data.pick_up_date || null,
-        data.delivered_date || null,
-        now,
-        now,
+        delivery.delivery_id,
+        delivery.order_id,
+        delivery.courier_id,
+        delivery.pick_up_date,
+        delivery.delivered_date,
+        delivery.created_at,
+        delivery.updated_at,
       ]
     );
 
     const [rows] = await this.pool.execute<RowDataPacket[]>(
       "SELECT * FROM delivery WHERE delivery_id = ?",
-      [data.delivery_id]
+      [delivery.delivery_id]
     );
 
     return rows[0] as Delivery;
