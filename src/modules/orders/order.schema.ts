@@ -2,10 +2,10 @@ import z from "zod";
 
 export const OrderSchema = z.object({
   order_id: z.string(),
-  user_id: z.string().nullable(),
-  product_id: z.string().nullable(),
-  order_quantity: z.number().nullable(),
-  status: z.enum(["PAID", "IN TRANSIT", "DELIVERED"]).nullable(),
+  user_id: z.string().optional().nullable(),
+  product_id: z.string().optional().nullable(),
+  order_quantity: z.number().optional().nullable(),
+  status: z.enum(["PAID", "IN TRANSIT", "DELIVERED"]).optional().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
 });

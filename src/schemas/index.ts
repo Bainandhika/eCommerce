@@ -272,12 +272,7 @@ export const CourierSchema = {
 
 export const CreateCourierSchema = {
   type: "object",
-  required: ["courier_id"],
   properties: {
-    courier_id: {
-      type: "string",
-      description: "Courier ID",
-    },
     name: {
       type: "string",
       description: "Courier name",
@@ -348,12 +343,7 @@ export const OrderSchema = {
 
 export const CreateOrderSchema = {
   type: "object",
-  required: ["order_id"],
   properties: {
-    order_id: {
-      type: "string",
-      description: "Order ID",
-    },
     user_id: {
       type: "string",
       description: "User ID",
@@ -441,12 +431,7 @@ export const DeliverySchema = {
 
 export const CreateDeliverySchema = {
   type: "object",
-  required: ["delivery_id"],
   properties: {
-    delivery_id: {
-      type: "string",
-      description: "Delivery ID",
-    },
     order_id: {
       type: "string",
       description: "Order ID",

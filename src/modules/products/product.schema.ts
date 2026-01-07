@@ -2,9 +2,9 @@ import z from "zod";
 
 export const ProductSchema = z.object({
   product_id: z.string(),
-  name: z.string().nullable(),
-  price: z.string().nullable(),
-  quantity: z.number().nullable(),
+  name: z.string().optional().nullable(),
+  price: z.string().optional().nullable(),
+  quantity: z.number().optional().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
 });

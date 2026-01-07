@@ -1,13 +1,13 @@
 import z from "zod";
 
 export const DeliverySchema = z.object({
-  delivery_id: z.uuid(),
-  order_id: z.uuid({ message: "Order ID must be a valid UUID" }),
-  courier_id: z.uuid({ message: "Order ID must be a valid UUID" }),
-  pick_up_date: z.iso.datetime().nullable(),
-  delivered_date: z.iso.datetime().nullable(),
-  created_at: z.iso.datetime(),
-  updated_at: z.iso.datetime().nullable(),
+  delivery_id: z.string(),
+  order_id: z.string().optional().nullable(),
+  courier_id: z.string().optional().nullable(),
+  pick_up_date: z.string().optional().nullable(),
+  delivered_date: z.string().optional().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
 });
 
 export const CreateDeliverySchema = DeliverySchema.omit({
