@@ -13,15 +13,21 @@ export class CourierRepo {
     const now = new Date().toISOString();
     const courier = {
       courier_id: uuidv4(),
-      name: data.name,
-      is_available: data.is_available,
+      name: data.name || null,
+      is_available: data.is_available ?? 1,
       created_at: now,
       updated_at: now,
     };
 
     await this.pool.execute<ResultSetHeader>(
       "INSERT INTO courier (courier_id, name, is_available, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-      [courier.courier_id, courier.name, courier.is_available, courier.created_at, courier.updated_at]
+      [
+        courier.courier_id,
+        courier.name,
+        courier.is_available,
+        courier.created_at,
+        courier.updated_at,
+      ]
     );
 
     const [rows] = await this.pool.execute<RowDataPacket[]>(
