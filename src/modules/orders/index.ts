@@ -110,7 +110,6 @@ const ordersModule: FastifyPluginAsync = async (fastify) => {
   // POST /api/orders - Create new order
   fastify.post<{
     Body: {
-      order_id: string;
       user_id?: string;
       product_id?: string;
       order_quantity?: number;
@@ -132,6 +131,15 @@ const ordersModule: FastifyPluginAsync = async (fastify) => {
               data: OrderSchema,
             },
           },
+          400: {
+            description:
+              "Bad request - Product not found or insufficient inventory",
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              error: { type: "string" },
+            },
+          },
           500: ErrorResponseSchema,
         },
       },
@@ -143,8 +151,20 @@ const ordersModule: FastifyPluginAsync = async (fastify) => {
           success: true,
           data: order,
         });
-      } catch (error) {
+      } catch (error: any) {
         fastify.log.error(error);
+
+        // Handle business logic errors
+        if (
+          error.message === "Product not found" ||
+          error.message.includes("Insufficient inventory")
+        ) {
+          return reply.status(400).send({
+            success: false,
+            error: error.message,
+          });
+        }
+
         return reply.status(500).send({
           success: false,
           error: "Failed to create order",
@@ -262,6 +282,109 @@ const ordersModule: FastifyPluginAsync = async (fastify) => {
         return reply.status(500).send({
           success: false,
           error: "Failed to delete order",
+        });
+      }
+    }
+  );
+
+  // GET /api/orders/user/:userId - Get orders by user ID
+  fastify.get<{ Params: { userId: string } }>(
+    "/orders/user/:userId",
+    {
+      schema: {
+        description: "Get all orders for a specific user",
+        tags: ["orders"],
+        params: {
+          type: "object",
+          required: ["userId"],
+          properties: {
+            userId: {
+              type: "string",
+              description: "User ID",
+            },
+          },
+        },
+        response: {
+          200: {
+            description: "Successful response",
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: {
+                type: "array",
+                items: OrderSchema,
+              },
+            },
+          },
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const userId = request.params.userId;
+        const orders = await dbService.getOrdersByUserId(userId);
+        return reply.send({
+          success: true,
+          data: orders,
+        });
+      } catch (error) {
+        fastify.log.error(error);
+        return reply.status(500).send({
+          success: false,
+          error: "Failed to fetch user orders",
+        });
+      }
+    }
+  );
+
+  // GET /api/orders/status/:status - Get orders by status
+  fastify.get<{ Params: { status: string } }>(
+    "/orders/status/:status",
+    {
+      schema: {
+        description: "Get all orders with a specific status",
+        tags: ["orders"],
+        params: {
+          type: "object",
+          required: ["status"],
+          properties: {
+            status: {
+              type: "string",
+              enum: ["PAID", "IN TRANSIT", "DELIVERED"],
+              description: "Order status",
+            },
+          },
+        },
+        response: {
+          200: {
+            description: "Successful response",
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: {
+                type: "array",
+                items: OrderSchema,
+              },
+            },
+          },
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const status = request.params.status;
+        const orders = await dbService.getOrdersByStatus(status);
+        return reply.send({
+          success: true,
+          data: orders,
+        });
+      } catch (error) {
+        fastify.log.error(error);
+        return reply.status(500).send({
+          success: false,
+          error: "Failed to fetch orders by status",
         });
       }
     }

@@ -110,7 +110,6 @@ const deliveriesModule: FastifyPluginAsync = async (fastify) => {
   // POST /api/deliveries - Create new delivery
   fastify.post<{
     Body: {
-      delivery_id: string;
       order_id?: string;
       courier_id?: string;
       pick_up_date?: string;

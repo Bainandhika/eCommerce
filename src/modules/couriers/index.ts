@@ -110,7 +110,6 @@ const couriersModule: FastifyPluginAsync = async (fastify) => {
   // POST /api/couriers - Create new courier
   fastify.post<{
     Body: {
-      courier_id: string;
       name?: string;
       is_available?: number;
     };
